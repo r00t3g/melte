@@ -1,4 +1,6 @@
-# zodern:melte
+# r00t3g:melte
+
+> **NOTE:** This plugin is based on [zodern:melte](https://github.com/zodern/melte), implements Typescript and SCSS preprocessing for Svelte components, and exists only until the changes are stabilized and accepted by [@zodern](https://github.com/zodern). For now this package is made for use within one certain project and yet is not production tested and is to be used at own risk. Please read through this README thoroughly to be aware of certain limitations and drawbacks introduced by this plugin! It is highly recommended to use the original plugin from https://github.com/zodern/melte for, now unless you are 100% sure what you are doing  
 
 Build [cybernetically enhanced web apps](https://svelte.dev) with Meteor and Svelte.
 
@@ -7,16 +9,18 @@ Based on [meteor-svelte](https://github.com/meteor-svelte/meteor-svelte/pull/30)
 - Tracker statements
 - Support for hot module replacement (HMR) to update modified components without requiring a full page reload. Requires your app to use Meteor 2 and the [hot-module-replacement](https://docs.meteor.com/packages/hot-module-replacement.html) package.
 - Handles syntax errors without crashing
+- Supports Typescript preprocessing for script blocks
+- Supports SCSS preprocessing and `global` attribute for style blocks
 
-Compatible with Meteor 1.8.2 and newer.
+**Tested ONLY with Meteor 2.1**
 
 ## Installation
 
-To use `meteor-svelte`, run the following commands:
+To use `r00t3g:melte`, run the following commands:
 
-```
-$ meteor add zodern:melte
-$ meteor npm install svelte
+```shell
+$ meteor add r00t3g:melte
+$ meteor npm install svelte svelte-preprocess 
 ```
 
 ### Tracker Statements
@@ -68,7 +72,7 @@ Sort by:
 
 Compiler options can be specified with a `"svelte:compiler"` property in `package.json`. For example:
 
-```
+```json
 {
   ...
   "svelte:compiler": {
@@ -94,6 +98,52 @@ If you want to reuse (hydrate) server-rendered HTML, set the `hydratable` option
 
 Svelte can [extract styles for server-side rendering](https://svelte.dev/docs#Server-side_component_API).
 If you want to render CSS on the server, you might want to set the `css` option to `false` so that client-rendered components don't insert CSS into the DOM.
+
+## Preprocessing
+
+### Scripts
+
+Currently, only Typescript preprocessing is supported for script blocks with `lang="ts"` attribute set. 
+In order to get preprocessing working, additional NPM-packages need to be installed:
+```shell
+$ meteor npm i --save-dev svelte-preprocess typescript
+```
+It is highly recommended to use TS version, supported by the Meteor release you are using.
+
+### Styles
+
+SCSS preprocessing is available for style blocks and is enabled for components by adding `lang="scss"` 
+attribute. Just as with scripts, an installation of the toolkit is required to use SCSS reprocessing:
+```shell
+$ meteor npm i --save-dev svelte-preprocess node-sass
+```
+It is highly recommended to use node-sass (libsass) version of the SCSS compiler, however, Dart version should 
+also work well.
+
+#### Style limitations:
+
+* In accordance with svlete-preprocess documentation, global styles are also supported, but **ONLY** by adding the 
+`global` attribute and **NOT** by the `:global` rule.
+  
+* SCSS transformer does not use Meteor resolver which makes it impossible to imports styles from Atmosphere packages.
+
+* For the same reason, all imports paths must be specified relatively to application root, e.g.:
+```scss
+@import 'client/style/theme.scss';
+```
+or
+```scss
+@import 'imports/style/variables.scss';
+```
+
+* To import files from node_modules, the import path must be prefixed with a tilde (`~`), e.g.: 
+```scss
+@import '~/my-awesome-library/lib/scss/library.scss';
+```
+or
+```scss
+@import '~/material-design-icons/iconfont/material-icons.css';
+```
 
 ## Server-Side Rendering
 
