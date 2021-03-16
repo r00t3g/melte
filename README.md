@@ -1,4 +1,6 @@
-# zodern:melte
+# r00t3g:melte
+
+> **NOTE:** This plugin is based on [zodern:melte](https://github.com/zodern/melte), implements Typescript and SCSS preprocessing for Svelte components, and exists only until the changes are stabilized and accepted by [@zodern](https://github.com/zodern). For now this package is made for use within one certain project and yet is not production tested and is to be used at own risk. Please read through this README thoroughly to be aware of certain limitations and drawbacks introduced by this plugin! It is highly recommended to use the original plugin from https://github.com/zodern/melte for, now unless you are 100% sure what you are doing  
 
 Build [cybernetically enhanced web apps](https://svelte.dev) with Meteor and Svelte.
 
@@ -7,16 +9,18 @@ Based on [meteor-svelte](https://github.com/meteor-svelte/meteor-svelte/pull/30)
 - Tracker statements
 - Support for hot module replacement (HMR) to update modified components without requiring a full page reload. Requires your app to use Meteor 2 and the [hot-module-replacement](https://docs.meteor.com/packages/hot-module-replacement.html) package.
 - Handles syntax errors without crashing
+- Supports Typescript preprocessing for script blocks
+- Supports SCSS preprocessing and `global` attribute for style blocks
 
-Compatible with Meteor 1.8.2 and newer.
+**Tested ONLY with Meteor 2.1**
 
 ## Installation
 
-To use `meteor-svelte`, run the following commands:
+To use `r00t3g:melte`, run the following commands:
 
 ```shell
-$ meteor add zodern:melte
-$ meteor npm install svelte
+$ meteor add r00t3g:melte
+$ meteor npm install svelte svelte-preprocess 
 ```
 
 ### Tracker Statements
