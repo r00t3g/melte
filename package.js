@@ -1,6 +1,6 @@
 Package.describe({
   name: 'r00t3g:melte',
-  version: '1.4.2',
+  version: '1.4.3',
   summary: 'Svelte compiler with tracker integration, HMR and preprocessing support',
   git: 'https://github.com/r00t3g/melte.git',
   documentation: 'README.md'
