@@ -1,22 +1,36 @@
 import { resolve } from 'path';
 
-const appdir = process.cwd();
+const appdir = resolve(process.cwd());
 
 const includePaths = [
-    resolve(appdir),
+    appdir,
     resolve(appdir, 'node_modules'),
 ];
 
-export async function processCode (file, filename, { content }) {
+export async function processCode(file, filename, { content }) {
     const transformer = require('svelte-preprocess/dist/transformers/scss').transformer;
 
     try {
         return await transformer({
             content,
             filename,
-            options: { includePaths, sourceMap: true }
+            options: {
+                includePaths,
+                sourceMap: true,
+                importer: [
+                    function (url, prev, done) {
+                        done({
+                            file: resolve(
+                                appdir,
+                                url.replace(/^\//, '')
+                            )
+                        });
+                    }
+                ]
+            }
         });
     } catch (e) {
+        e.message += `\n${e.stack}`;
         file.error(e);
         return { code: '' };
     }
