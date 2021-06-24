@@ -1,4 +1,4 @@
-import { resolve } from 'path';
+import { resolve, dirname } from 'path';
 
 const appdir = resolve(process.cwd());
 
@@ -21,7 +21,9 @@ export async function processCode(file, filename, { content }) {
                     function (url, prev, done) {
                         done({
                             file: resolve(
-                                appdir,
+                                url.indexOf('.') === 0
+                                    ? dirname(filename)
+                                    : appdir,
                                 url.replace(/^\//, '')
                             )
                         });

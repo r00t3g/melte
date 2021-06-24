@@ -14,6 +14,14 @@ Based on [meteor-svelte](https://github.com/meteor-svelte/meteor-svelte/pull/30)
 
 **Tested ONLY with Meteor 2.1**
 
+## Changelog
+* **2021-06-25: v.1.4.7** Multiple improvements:
+  * Fix relative import paths in SCSS
+  * Allow multiple `<style global />` tags in Svelte components
+* **2021-04-16: v.1.4.6** Meteor-compatible paths support in SCSS imports
+* **2021-04-02: v.1.4.5** Upstream sync, reactive labels imports fix (#1)
+* **2021-03-16: v.1.4.4** Basic TS and CSS preprocessing support added
+
 ## Installation
 
 To use `r00t3g:melte`, run the following commands:
@@ -129,11 +137,11 @@ also work well.
 
 * For the same reason, all imports paths must be specified relatively to application root, e.g.:
 ```scss
-@import 'client/style/theme.scss';
+@import '/client/style/theme.scss';
 ```
 or
 ```scss
-@import 'imports/style/variables.scss';
+@import '/imports/style/variables.scss';
 ```
 
 * To import files from node_modules, the import path must be prefixed with a tilde (`~`), e.g.: 

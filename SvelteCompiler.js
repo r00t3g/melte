@@ -25,6 +25,8 @@ const b = types.builders;
 const TRACKER_WRAPPER_PREFIX = '_m_tracker';
 const TRACKER_WRAPPER_CREATOR = '_m_createReactiveWrapper';
 const SCSS_STYLE_REGEX = /<style[^>]+lang=['"]scss['"]/;
+const GLOBAL_STYLE_EXTRACTION = '/** extracted into global style */';
+const GLOBAL_STYLE_EXTRACTION_REGEX = /<style[^>]+global[^>]*>\/\*\* extracted into global style \*\/<\/style>/g;
 
 const { createMakeHot } = require('svelte-hmr');
 
@@ -347,6 +349,7 @@ SvelteCompiler = class SvelteCompiler extends CachingCompiler {
                             };
                         }
                     }
+                    
 
                     if (attributes.lang === 'scss') {
                         const shallEmit = 'global' in attributes;
@@ -367,7 +370,7 @@ SvelteCompiler = class SvelteCompiler extends CachingCompiler {
                             lazy: false,
                         });
 
-                        return { code: '/** extracted into global style */' };
+                        return { code: GLOBAL_STYLE_EXTRACTION };
                     }
                 }
             })));
@@ -385,6 +388,8 @@ SvelteCompiler = class SvelteCompiler extends CachingCompiler {
 
         let compiledResult;
         try {
+            code = code.replace(GLOBAL_STYLE_EXTRACTION_REGEX, '');
+
             compiledResult = this.svelte.compile(code, svelteOptions);
 
             if (map) {
