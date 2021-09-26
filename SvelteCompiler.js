@@ -8,11 +8,11 @@ import { analyze, extract_names } from 'periscopic';
 
 import { processCode } from './scss-processor';
 
-function createRecastParser(isTS = false) {
+function createRecastParser (isTS = false) {
     const parser = isTS ? typescript : acorn;
 
     return {
-        parse(_, options) {
+        parse (_, options) {
             options.ecmaVersion = 2020;
 
             return parser.parse.apply(acorn, arguments);
@@ -39,7 +39,7 @@ const PREPROCESS_VERSION = 8;
 const PACKAGE_NAME = 'r00t3g:melte';
 
 SvelteCompiler = class SvelteCompiler extends CachingCompiler {
-    constructor(options = {}) {
+    constructor (options = {}) {
         super({
             compilerName: 'svelte',
             defaultCacheSize: 1024 * 1024 * 10
@@ -90,11 +90,11 @@ SvelteCompiler = class SvelteCompiler extends CachingCompiler {
         }
     }
 
-    hmrAvailable(file) {
+    hmrAvailable (file) {
         return typeof file.hmrAvailable === 'function' && file.hmrAvailable();
     }
 
-    getCacheKey(file) {
+    getCacheKey (file) {
         if (SCSS_STYLE_REGEX.test(file.getContentsAsString())) {
             // We intentionally omit caching now for components with SCSS styles,
             // otherwise it will demand a really complicated way of tracking
@@ -117,11 +117,11 @@ SvelteCompiler = class SvelteCompiler extends CachingCompiler {
         ];
     }
 
-    setDiskCacheDirectory(cacheDirectory) {
+    setDiskCacheDirectory (cacheDirectory) {
         this._diskCache = cacheDirectory;
     }
 
-    _setBabelCacheDirectory(suffix) {
+    _setBabelCacheDirectory (suffix) {
         // Babel doesn't use the svelte or preprocessor versions in its cache keys
         // so we instead use the versions in the cache path
         const babelSuffix = `-babel-${(this.svelte || {}).VERSION}-${PREPROCESS_VERSION}-${process.env.NODE_ENV
@@ -133,7 +133,7 @@ SvelteCompiler = class SvelteCompiler extends CachingCompiler {
     // object. If the processed HTML file is not a Svelte component, the result is
     // an array of HTML sections (head and/or body). Otherwise, it's an object
     // with JavaScript from a compiled Svelte component.
-    compileResultSize(result) {
+    compileResultSize (result) {
         let size = 0;
 
         if (Array.isArray(result)) {
@@ -145,7 +145,7 @@ SvelteCompiler = class SvelteCompiler extends CachingCompiler {
         return size;
     }
 
-    getHtmlSections(file) {
+    getHtmlSections (file) {
         const path = file.getPathInPackage();
         const extension = path.substring(path.lastIndexOf('.') + 1);
 
@@ -173,7 +173,7 @@ SvelteCompiler = class SvelteCompiler extends CachingCompiler {
         }
     }
 
-    compileOneFileLater(file, getResult) {
+    compileOneFileLater (file, getResult) {
         // Search for top-level head and body tags. If at least one of these tags
         // exists, the file is not processed with the Svelte compiler. Instead, the
         // inner HTML of the tags is added to the respective section in the HTML
@@ -191,7 +191,7 @@ SvelteCompiler = class SvelteCompiler extends CachingCompiler {
         }
     }
 
-    async compileOneFile(file) {
+    async compileOneFile (file) {
         // Search for head and body tags if lazy compilation isn't supported.
         // Otherwise, the file has already been parsed in `compileOneFileLater`.
         if (!file.supportsLazyCompilation) {
@@ -349,7 +349,6 @@ SvelteCompiler = class SvelteCompiler extends CachingCompiler {
                             };
                         }
                     }
-                    
 
                     if (attributes.lang === 'scss') {
                         const shallEmit = 'global' in attributes;
@@ -428,7 +427,7 @@ SvelteCompiler = class SvelteCompiler extends CachingCompiler {
             );
         } catch (e) {
             // Throw unknown errors.
-            if (!e.start) {
+            if (!e.start && e.message !== 'Babel compilation error!') {
                 throw e;
             }
 
@@ -450,13 +449,13 @@ SvelteCompiler = class SvelteCompiler extends CachingCompiler {
 
             file.error({
                 message,
-                line: e.start.line,
-                column: e.start.column
+                line: e.start ? e.start.line : 0,
+                column: e.start ? e.start.column : 0,
             });
         }
     }
 
-    addCompileResult(file, result) {
+    addCompileResult (file, result) {
         if (Array.isArray(result)) {
             result.forEach(section => file.addHtml(section));
         } else {
@@ -464,28 +463,37 @@ SvelteCompiler = class SvelteCompiler extends CachingCompiler {
         }
     }
 
-    transpileWithBabel(source, path, file) {
+    transpileWithBabel (source, path, file) {
         // We need a different folder when HMR is enabled
         // to prevent babel from using those cache entries
         // in production builds
         this._setBabelCacheDirectory(this.hmrAvailable(file) ? '-hmr' : '');
 
-        const {
-            data,
-            sourceMap
-        } = this.babelCompiler.processOneFileForTarget(file, source.code);
+        let data = '', sourceMap = null;
+
+        try {
+            const result = this.babelCompiler.processOneFileForTarget(file, source.code);
+            ({ data, sourceMap } = result || {});
+        } catch (e) {
+            e.message += `\n${e.stack}`;
+            file.error(e);
+        }
+
+        if (!data || !sourceMap) {
+            throw new Error('Babel compilation error!');
+        }
 
         return {
             sourcePath: path,
             path,
             data,
-            sourceMap: this.combineSourceMaps(sourceMap, source.map)
+            sourceMap: sourceMap ? this.combineSourceMaps(sourceMap, source.map) : source.map,
         };
     }
 
     // Generates a new source map that maps a file transpiled by Babel back to the
     // original HTML via a source map generated by the Svelte compiler.
-    combineSourceMaps(targetMap, originalMap) {
+    combineSourceMaps (targetMap, originalMap) {
         const result = new sourcemap.SourceMapGenerator;
 
         const targetConsumer = new sourcemap.SourceMapConsumer(targetMap);
