@@ -1,4 +1,4 @@
-import { resolve, dirname } from 'path';
+import { dirname, resolve } from 'path';
 
 const appdir = resolve(process.cwd());
 
