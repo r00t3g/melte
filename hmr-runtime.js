@@ -1,39 +1,39 @@
 const { makeApplyHmr } = require('svelte-hmr/runtime');
 
 module.exports.applyHmr = makeApplyHmr(args => {
-  // Mark this file as reloadable
-  args.m.hot.accept();
+    // Mark this file as reloadable
+    args.m.hot.accept();
 
-  let acceptCallback = null;
-  if (args.m.hot.data?.acceptCallback) {
-    // svelte-hmr expects accept to work as with nollup or vite
-    // applying changes is done synchronously, so we wait until after it is done
-    setTimeout(() => args.m.hot.data.acceptCallback(), 10);
-  }
-
-  args.m.hot.dispose((data) => {
-    if (acceptCallback) {
-      data.acceptCallback = acceptCallback;
+    let acceptCallback = null;
+    if (args.m.hot.data?.acceptCallback) {
+        // svelte-hmr expects accept to work as with nollup or vite
+        // applying changes is done synchronously, so we wait until after it is done
+        setTimeout(() => args.m.hot.data.acceptCallback(), 10);
     }
-  });
 
-  return Object.assign({}, args, {
-    hot: {
-      ...args.m.hot,
-      accept(cb) {
-        acceptCallback = cb;
-      }
-    },
-    hotOptions: {
-      ...(args.hotOptions || {}),
-      noOverlay: true
-    },
-    reload() {
-      if (Package && Package.reload) {
-        Package.reload.Reload._reload({ immediateMigration: true });
-      } else {
-        window.location.reload();
-      }
-    }
-  });
+    args.m.hot.dispose((data) => {
+        if (acceptCallback) {
+            data.acceptCallback = acceptCallback;
+        }
+    });
+
+    return Object.assign({}, args, {
+        hot: {
+            ...args.m.hot,
+            accept(cb) {
+                acceptCallback = cb;
+            }
+        },
+        hotOptions: {
+            ...(args.hotOptions || {}),
+            noOverlay: true
+        },
+        reload() {
+            if (Package && Package.reload) {
+                Package.reload.Reload._reload({ immediateMigration: true });
+            } else {
+                window.location.reload();
+            }
+        }
+    });
 });
